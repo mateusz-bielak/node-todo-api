@@ -1,21 +1,21 @@
 {
-  "name": "todo-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "nodemon"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "mongodb": "^3.1.4",
-    "mongoose": "^5.2.13"
-  },
-  "devDependencies": {
-    "nodemon": "^1.18.4"
-  }
+    "name": "todo-api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "nodemon server/server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.18.3",
+        "express": "^4.16.3",
+        "mongodb": "^3.1.4",
+        "mongoose": "^5.2.13"
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.4"
+    }
 }
