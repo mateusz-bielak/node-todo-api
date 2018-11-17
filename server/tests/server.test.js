@@ -8,7 +8,7 @@ const { app } = require('../server');
 const mockedTodos = [
     { _id: new ObjectID(), text: 'First test todo' },
     { _id: new ObjectID(), text: 'Second test todo' },
-    { _id: new ObjectID(), text: 'Third test todo' },
+    { _id: new ObjectID(), text: 'Third test todo', completed: true, completedAt: 333 },
 ];
 
 beforeEach(done => {
@@ -130,6 +130,42 @@ describe('DELETE /todos/:id', () => {
         request(app)
             .delete('/todos/123')
             .expect(404)
+            .end(done);
+    });
+});
+
+describe('PATCH /todos/:id', () => {
+    it('should update the todo', done => {
+        const hexId = mockedTodos[0]._id.toHexString();
+        const text = 'New testing text';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({ text, completed: true })
+            .expect(200)
+            .expect(({ body: { todo } }) => {
+                expect(todo._id).toBe(hexId);
+                expect(todo.completed).toBe(true);
+                expect(todo.text).toBe(text);
+                expect(typeof todo.completedAt).toBe('number');
+            })
+            .end(done);
+    });
+
+    it('should clear completedAt when todo is not completed', done => {
+        const hexId = mockedTodos[2]._id.toHexString();
+        const text = 'New testing text';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({ text, completed: false })
+            .expect(200)
+            .expect(({ body: { todo } }) => {
+                expect(todo._id).toBe(hexId);
+                expect(todo.completed).toBe(false);
+                expect(todo.text).toBe(text);
+                expect(todo.completedAt).toBeFalsy();
+            })
             .end(done);
     });
 });
