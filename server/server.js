@@ -3,11 +3,12 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const { ObjectID } = require('mongodb');
 
-require('./db/mongoose');
 const { Todo } = require('./models/todo');
+require('./config/config');
+require('./db/mongoose');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
@@ -15,6 +16,8 @@ app.post('/todos', (req, res) => {
     const todo = new Todo({
         text: req.body.text,
     });
+
+    console.log();
 
     todo.save()
         .then(doc => res.send(doc))
