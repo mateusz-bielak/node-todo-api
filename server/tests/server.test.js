@@ -19,7 +19,7 @@ describe('POST /todos', () => {
             .send({ text })
             .expect(200)
             .expect(res => expect(res.body.text).toBe(text))
-            .end((err, res) => {
+            .end(err => {
                 if (err) {
                     return done(err);
                 }
@@ -39,7 +39,7 @@ describe('POST /todos', () => {
             .post('/todos')
             .send({})
             .expect(400)
-            .end((err, res) => {
+            .end(err => {
                 if (err) {
                     return done(err);
                 }
@@ -98,7 +98,7 @@ describe('DELETE /todos/:id', () => {
             .expect(res => {
                 expect(res.body.todo._id).toBe(hexId);
             })
-            .end((err, res) => {
+            .end(err => {
                 if (err) {
                     return done(err);
                 }
@@ -206,11 +206,13 @@ describe('POST /users', () => {
                     return done(err);
                 }
 
-                User.findOne({ email }).then(user => {
-                    expect(user).toBeTruthy();
-                    expect(user.password).not.toBe(password);
-                    done();
-                });
+                User.findOne({ email })
+                    .then(user => {
+                        expect(user).toBeTruthy();
+                        expect(user.password).not.toBe(password);
+                        done();
+                    })
+                    .catch(done);
             });
     });
 
@@ -234,5 +236,60 @@ describe('POST /users', () => {
             .send({ email, password })
             .expect(400)
             .end(done);
+    });
+});
+
+describe('POST /users/login', () => {
+    it('should login user and return auth token', done => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: mockedUsers[1].email,
+                password: mockedUsers[1].password,
+            })
+            .expect(200)
+            .expect(res => {
+                expect(res.headers['x-auth']).toBeTruthy();
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err);
+                }
+
+                User.findById(mockedUsers[1]._id)
+                    .then(user => {
+                        expect(user.tokens[0]).toMatchObject({
+                            access: 'auth',
+                            token: res.headers['x-auth'],
+                        });
+                        done();
+                    })
+                    .catch(done);
+            });
+    });
+
+    it('should reject invalid login', done => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: mockedUsers[1].email,
+                password: 'wrong-password',
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.headers['x-auth']).toBeFalsy();
+            })
+            .end(err => {
+                if (err) {
+                    return done(err);
+                }
+
+                User.findById(mockedUsers[1]._id)
+                    .then(user => {
+                        expect(user.tokens.length).toBe(0);
+                        done();
+                    })
+                    .catch(done);
+            });
     });
 });
