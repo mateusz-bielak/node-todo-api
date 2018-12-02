@@ -28,7 +28,6 @@ app.get('/todos', (_, res) =>
     Todo.find()
         .then(todos => res.send({ todos }))
         .catch(e => {
-            console.log(e);
             res.status(400).send(e);
         }),
 );
@@ -42,7 +41,7 @@ app.get('/todos/:id', (req, res) => {
 
     Todo.findById(id)
         .then(todo => (todo ? res.send({ todo }) : res.status(404).send()))
-        .catch(e => res.status(400).send());
+        .catch(() => res.status(400).send());
 });
 
 app.delete('/todos/:id', (req, res) => {
@@ -74,7 +73,7 @@ app.patch('/todos/:id', (req, res) => {
 
     Todo.findByIdAndUpdate(id, { $set: body }, { new: true })
         .then(todo => (todo ? res.send({ todo }) : res.status(404).send()))
-        .catch(e => {
+        .catch(() => {
             res.status(400).send();
         });
 });
@@ -102,7 +101,18 @@ app.post('/users/login', (req, res) => {
                 res.header('x-auth', token).send(user);
             });
         })
-        .catch(e => {
+        .catch(() => {
+            res.status(400).send();
+        });
+});
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+    req.user
+        .removeToken(req.token)
+        .then(() => {
+            res.status(200).send();
+        })
+        .catch(() => {
             res.status(400).send();
         });
 });
